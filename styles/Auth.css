@@ -1,0 +1,11 @@
+.auth-page .card {
+    border: 1px solid var(--brand-border);
+}
+
+.auth-page .form-control {
+    min-height: 42px;
+}
+
+.auth-page .card-body {
+    padding: 2rem;
+}

@@ -1,0 +1,22 @@
+.hero-section {
+    background: linear-gradient(180deg, #ffffff 0%, #f8f6f0 100%);
+}
+
+.hero-benefits {
+    border: 1px solid var(--brand-border);
+}
+
+.trust-item {
+    min-height: 110px;
+}
+
+.category-card {
+    transition: all 0.2s ease;
+    border-color: var(--brand-border) !important;
+    background: #fff;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--brand-gold) !important;
+}

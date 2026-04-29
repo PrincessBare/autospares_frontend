@@ -1,0 +1,10 @@
+.product-detail-image {
+    max-height: 420px;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .product-detail-image {
+        max-height: 280px;
+    }
+}

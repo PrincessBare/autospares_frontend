@@ -1,0 +1,9 @@
+.card textarea.form-control {
+    resize: vertical;
+}
+
+@media (max-width: 992px) {
+    .checkout-sticky {
+        position: static !important;
+    }
+}
