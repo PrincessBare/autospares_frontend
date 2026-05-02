@@ -52,7 +52,6 @@ const AdminDashboard = ({ section = 'products' }) => {
   const [userForm, setUserForm] = useState(initialUserForm);
   const [orderForm, setOrderForm] = useState(initialOrderForm);
   const [productImageFile, setProductImageFile] = useState(null);
-  const [selectedPayment, setSelectedPayment] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
   const [catalog, setCatalog] = useState({
     products: [],
@@ -61,7 +60,6 @@ const AdminDashboard = ({ section = 'products' }) => {
     brands: [],
     models: [],
     orders: [],
-    payments: [],
     users: [],
   });
 
@@ -89,7 +87,6 @@ const AdminDashboard = ({ section = 'products' }) => {
         brandsRes,
         modelsRes,
         ordersRes,
-        paymentsRes,
         usersRes,
       ] = await Promise.all([
         productService.getAllProducts(1, 100),
@@ -98,7 +95,6 @@ const AdminDashboard = ({ section = 'products' }) => {
         productService.getAllBrands(),
         productService.getAllModels(),
         adminService.getAdminOrders(),
-        adminService.getPayments(),
         adminService.getUsers(),
       ]);
 
@@ -109,7 +105,6 @@ const AdminDashboard = ({ section = 'products' }) => {
         brands: brandsRes.data?.data || [],
         models: modelsRes.data?.data || [],
         orders: ordersRes.data?.data || [],
-        payments: paymentsRes.data?.data || [],
         users: usersRes.data?.data || [],
       });
     } catch (err) {
@@ -122,7 +117,6 @@ const AdminDashboard = ({ section = 'products' }) => {
   const closeModal = () => {
     setModal({ type: null, mode: 'create', item: null });
     setProductImageFile(null);
-    setSelectedPayment(null);
     setValidationErrors({});
   };
 
@@ -240,21 +234,12 @@ const AdminDashboard = ({ section = 'products' }) => {
     }
   };
 
-  const openPaymentModal = (item) => {
-    setSelectedPayment(item);
-    setValidationErrors({});
-    setModal({ type: 'payment', mode: 'view', item });
-  };
-
   const openDeleteModal = (entityType, item) => {
     setValidationErrors({});
     setModal({ type: 'delete', mode: 'delete', item: { ...item, entityType } });
   };
 
   const openViewModal = (type, item) => {
-    if (type === 'payment') {
-      setSelectedPayment(item);
-    }
     setValidationErrors({});
     setModal({ type, mode: 'view', item });
   };
@@ -452,25 +437,6 @@ const AdminDashboard = ({ section = 'products' }) => {
       await loadAdminData();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to delete item.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleRefreshPayment = async (payment) => {
-    try {
-      setSaving(true);
-      setError(null);
-      setSuccess(null);
-      await adminService.refreshPayment(payment.order_id);
-      setSuccess('Payment refreshed from PayNow.');
-      await loadAdminData();
-      if (selectedPayment && String(selectedPayment.id) === String(payment.id)) {
-        const updated = catalog.payments.find((item) => String(item.id) === String(payment.id));
-        setSelectedPayment(updated || payment);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to refresh payment.');
     } finally {
       setSaving(false);
     }
@@ -817,22 +783,6 @@ const AdminDashboard = ({ section = 'products' }) => {
       );
     }
 
-    if (modal.type === 'payment' && selectedPayment) {
-      return (
-        <div className="admin-detail-grid">
-          <div><strong>Order ID:</strong> #{selectedPayment.order_id}</div>
-          <div><strong>Customer:</strong> {selectedPayment.customer_name || 'N/A'}</div>
-          <div><strong>Method:</strong> {selectedPayment.payment_method}</div>
-          <div><strong>Status:</strong> {selectedPayment.payment_status}</div>
-          <div className="admin-grid-span"><strong>Customer email:</strong> {selectedPayment.customer_email || 'N/A'}</div>
-          <div className="admin-grid-span"><strong>Merchant reference:</strong> {selectedPayment.merchant_reference || 'N/A'}</div>
-          <div className="admin-grid-span"><strong>PayNow reference:</strong> {selectedPayment.paynow_reference || 'Pending'}</div>
-          <div className="admin-grid-span"><strong>Poll URL:</strong> {selectedPayment.poll_url || 'N/A'}</div>
-          <div className="admin-grid-span"><strong>Redirect URL:</strong> {selectedPayment.browser_url || 'N/A'}</div>
-        </div>
-      );
-    }
-
     if (modal.type === 'delete' && modal.item) {
       return <p className="mb-0">Delete this {modal.item.entityType} permanently?</p>;
     }
@@ -843,17 +793,6 @@ const AdminDashboard = ({ section = 'products' }) => {
   const renderModalFooter = () => {
     if (!modal.type) {
       return null;
-    }
-
-    if (modal.type === 'payment') {
-      return (
-        <>
-          <button className="btn btn-outline-secondary" type="button" onClick={closeModal}>Close</button>
-          <button className="btn btn-primary" type="button" disabled={saving} onClick={() => handleRefreshPayment(selectedPayment)}>
-            Refresh from PayNow
-          </button>
-        </>
-      );
     }
 
     if (modal.type === 'delete') {
@@ -909,10 +848,6 @@ const AdminDashboard = ({ section = 'products' }) => {
     orders: {
       title: 'Orders',
       description: 'Review customer orders and update their lifecycle.',
-    },
-    payments: {
-      title: 'Payments',
-      description: 'View PayNow records and refresh payment status.',
     },
     users: {
       title: 'Users',
@@ -1184,50 +1119,6 @@ const AdminDashboard = ({ section = 'products' }) => {
         </section>
       )}
 
-      {section === 'payments' && (
-        <section className="card admin-section-card">
-          <div className="card-body">
-            <div className="admin-section-header">
-              <div>
-                <h2 className="h5 mb-1">Payments</h2>
-                <p className="text-muted mb-0">View PayNow payment records and refresh a payment from the gateway.</p>
-              </div>
-            </div>
-            <div className="table-responsive">
-              <table className="table align-middle">
-                <thead>
-                  <tr>
-                    <th>Order</th>
-                    <th>Customer</th>
-                    <th>Method</th>
-                    <th>Status</th>
-                    <th>Reference</th>
-                    <th className="text-end">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {catalog.payments.map((item) => (
-                    <tr key={item.id}>
-                      <td>#{item.order_id}</td>
-                      <td>{item.customer_name || 'N/A'}</td>
-                      <td>{item.payment_method}</td>
-                      <td>{item.payment_status}</td>
-                      <td>{item.merchant_reference || 'Pending'}</td>
-                      <td className="text-end">
-                        <div className="admin-row-actions justify-content-end">
-                          <button className="btn btn-sm btn-outline-secondary" onClick={() => openPaymentModal(item)}>View</button>
-                          <button className="btn btn-sm btn-outline-primary" onClick={() => handleRefreshPayment(item)}>Refresh</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      )}
-
       {section === 'users' && (
         <section className="card admin-section-card">
           <div className="card-body">
@@ -1276,9 +1167,7 @@ const AdminDashboard = ({ section = 'products' }) => {
         title={
           modal.type === 'delete'
             ? 'Confirm delete'
-            : modal.type === 'payment'
-              ? 'Payment details'
-              : modal.mode === 'view'
+            : modal.mode === 'view'
                 ? `View ${modal.type === 'subCategory' ? 'sub-category' : modal.type || ''}`
               : modal.type === 'order'
                 ? 'Manage order'

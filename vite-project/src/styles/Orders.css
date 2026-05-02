@@ -1,0 +1,10 @@
+.badge {
+  text-transform: capitalize;
+}
+
+.orders-empty {
+  border: 1px dashed var(--brand-border);
+  border-radius: 1rem;
+  padding: 2rem;
+  background: #fff;
+}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiCreditCard, FiMapPin, FiUser } from 'react-icons/fi';
+import { FiCheckCircle, FiMapPin, FiUser } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
 import { useCartStore } from '../stores/cartStore';
 import orderService from '../services/orderService';
@@ -43,22 +43,7 @@ const Checkout = () => {
       const response = await orderService.createOrder(payload);
       const order = response.data?.data;
 
-      if (order?.id) {
-        const paymentResponse = await orderService.processPayment({
-          orderId: order.id,
-          paymentMethod: 'paynow',
-        });
-
-        const redirectUrl = paymentResponse.data?.data?.redirectUrl;
-        if (!redirectUrl) {
-          throw new Error('PayNow did not return a redirect URL.');
-        }
-
-        clearCart();
-        window.location.href = redirectUrl;
-        return;
-      }
-
+      clearCart();
       navigate('/orders');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to place order.');
@@ -89,8 +74,8 @@ const Checkout = () => {
                   <textarea className="form-control" rows="3" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} required />
                 </div>
                 <button className="btn btn-success" type="submit" disabled={loading}>
-                  <FiCreditCard className="me-2" />
-                  {loading ? 'Redirecting to PayNow...' : 'Pay with PayNow'}
+                  <FiCheckCircle className="me-2" />
+                  {loading ? 'Placing order...' : 'Place order'}
                 </button>
               </form>
             </div>

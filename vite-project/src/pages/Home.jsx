@@ -1,11 +1,6 @@
-/**
- * Home Page Component
- * Landing page with featured products and categories
- */
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiGrid, FiShield, FiTruck } from 'react-icons/fi';
+import { FiArrowRight } from 'react-icons/fi';
 import Loading from '../components/Loading';
 import ErrorAlert from '../components/ErrorAlert';
 import { useAuth } from '../hooks/useAuth';
@@ -17,29 +12,21 @@ import '../styles/Home.css';
 const Home = () => {
   const formatMoney = (value) => Number(value || 0).toFixed(2);
   const { user } = useAuth();
-  // State management
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const isAdmin = user?.role === USER_ROLES.ADMIN;
 
-  /**
-   * Fetch featured products and categories on component mount
-   */
   useEffect(() => {
     fetchData();
   }, []);
 
-  /**
-   * Fetch products and categories from API
-   */
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch products and categories in parallel
       const [productsRes, categoriesRes] = await Promise.all([
         productService.getAllProducts(1, 8),
         productService.getAllCategories(),
@@ -59,31 +46,23 @@ const Home = () => {
 
   return (
     <div>
-      {/* Hero Section */}
       <section className="hero-section py-5">
         <div className="container">
           <div className="row align-items-center g-4">
             <div className="col-lg-7">
-              <h1 className="display-5 fw-bold mb-3">Premium Auto Parts, Delivered Fast</h1>
-              <p className="lead mb-4 text-secondary">
-                {isAdmin
-                  ? 'Review the live catalog and keep products, categories, brands, and models up to date.'
-                  : 'Discover high-quality components by category and find the right fit for your vehicle.'}
-              </p>
+              <h1 className="display-5 fw-bold mb-3">Auto parts made simple</h1>
               <div className="d-flex flex-wrap gap-2">
                 <Link to={isAdmin ? '/admin/products' : '/products'} className="btn btn-primary btn-lg">
-                  {isAdmin ? 'Open admin panel' : 'Shop collection'} <FiArrowRight className="ms-2" />
+                  {isAdmin ? 'Admin' : 'Shop'} <FiArrowRight className="ms-2" />
                 </Link>
                 <Link to={isAdmin ? '/products' : '/orders'} className="btn btn-outline-primary btn-lg">
-                  {isAdmin ? 'Review catalog' : 'Track orders'}
+                  {isAdmin ? 'Catalog' : 'Orders'}
                 </Link>
               </div>
             </div>
             <div className="col-lg-5">
               <div className="hero-benefits card p-4">
-                <div className="d-flex align-items-center mb-3"><FiTruck className="me-2 text-primary" /> Reliable nationwide shipping</div>
-                <div className="d-flex align-items-center mb-3"><FiShield className="me-2 text-primary" /> Secure checkout and order records</div>
-                <div className="d-flex align-items-center"><FiGrid className="me-2 text-primary" /> Organized product catalog</div>
+                <strong>Find parts. Add to cart. Place your order.</strong>
               </div>
             </div>
           </div>
@@ -92,17 +71,15 @@ const Home = () => {
 
       <section className="container mb-4">
         <div className="row g-3">
-          <div className="col-md-4"><div className="trust-item card p-3"><strong>Quality first</strong><span className="text-muted small">Tested inventory and clear product details</span></div></div>
-          <div className="col-md-4"><div className="trust-item card p-3"><strong>{isAdmin ? 'Catalog control' : 'Fast service'}</strong><span className="text-muted small">{isAdmin ? 'Manage core catalog records from one admin workspace' : 'Simple ordering from browse to checkout'}</span></div></div>
-          <div className="col-md-4"><div className="trust-item card p-3"><strong>{isAdmin ? 'Clear structure' : 'Transparent pricing'}</strong><span className="text-muted small">{isAdmin ? 'Products stay linked to categories, brands, and models' : 'Clear totals and stock visibility'}</span></div></div>
+          <div className="col-md-4"><div className="trust-item card p-3"><strong>Quality parts</strong></div></div>
+          <div className="col-md-4"><div className="trust-item card p-3"><strong>Fast orders</strong></div></div>
+          <div className="col-md-4"><div className="trust-item card p-3"><strong>Clear prices</strong></div></div>
         </div>
       </section>
 
-      {/* Error Alert */}
       {error && <ErrorAlert message={error} onClose={() => setError(null)} />}
 
       <div className="container my-5">
-        {/* Featured Categories */}
         <section className="mb-5">
           <h2 className="h3 fw-bold mb-4">Shop by Category</h2>
           <div className="row">
@@ -124,7 +101,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Featured Products */}
         <section>
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="h3 fw-bold mb-0">Featured Products</h2>
@@ -138,7 +114,6 @@ const Home = () => {
                   className="text-decoration-none"
                 >
                   <div className="product-card card h-100">
-                    {/* Product Image */}
                     <div className="product-image bg-light d-flex align-items-center justify-content-center" style={{ height: '200px' }}>
                       <img
                         src={resolveAssetUrl(product.img)}
@@ -148,7 +123,6 @@ const Home = () => {
                       />
                     </div>
 
-                    {/* Product Info */}
                     <div className="card-body d-flex flex-column">
                       <h6 className="card-title text-dark fw-bold mb-2">
                         {product.name}

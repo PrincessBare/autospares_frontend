@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { FiCheckCircle, FiShoppingCart, FiTag } from 'react-icons/fi';
@@ -13,34 +12,23 @@ import '../styles/ProductDetail.css';
 
 const ProductDetail = () => {
   const formatMoney = (value) => Number(value || 0).toFixed(2);
-  // URL parameters and navigation
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  
-  // State management
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [addedToCart, setAddedToCart] = useState(false);
-
-  // Cart store
   const addItem = useCartStore((state) => state.addItem);
   const isAdmin = user?.role === USER_ROLES.ADMIN;
 
-  if (isAdmin) {
-    return <Navigate to="/admin/products" replace />;
-  }
-
-  
   useEffect(() => {
-    fetchProduct();
-  }, [id]);
+    if (!isAdmin) {
+      fetchProduct();
+    }
+  }, [id, isAdmin]);
 
-  /**
-   * Fetch single product from API
-   */
   const fetchProduct = async () => {
     try {
       setLoading(true);
@@ -55,18 +43,17 @@ const ProductDetail = () => {
     }
   };
 
-  /**
-   * Handle add to cart action
-   */
   const handleAddToCart = () => {
     if (product && quantity > 0) {
       addItem(product, quantity);
       setAddedToCart(true);
-      
-      // Reset message after 2 seconds
       setTimeout(() => setAddedToCart(false), 2000);
     }
   };
+
+  if (isAdmin) {
+    return <Navigate to="/admin/products" replace />;
+  }
 
   if (loading) return <Loading message="Loading product..." />;
 
@@ -83,7 +70,6 @@ const ProductDetail = () => {
       {error && <ErrorAlert message={error} onClose={() => setError(null)} />}
 
       <div className="row">
-        {/* Product Image */}
         <div className="col-md-6 mb-4">
           <div className="bg-light p-4 rounded" style={{ minHeight: '400px' }}>
             <img
@@ -94,21 +80,12 @@ const ProductDetail = () => {
             />
           </div>
         </div>
-
-        {/* Product Details */}
         <div className="col-md-6">
-          {/* Title */}
           <h1 className="h2 fw-bold mb-2">{product.name}</h1>
-
-          {/* Price */}
           <div className="mb-4">
             <h3 className="text-primary fw-bold"><FiTag className="me-2" />${formatMoney(product.price)}</h3>
           </div>
-
-          {/* Description */}
           <p className="text-muted mb-4">{product.description}</p>
-
-          {/* Product Info Grid */}
           <div className="row mb-4 bg-light p-3 rounded">
             <div className="col-6">
               <small className="text-muted">Stock Available</small>

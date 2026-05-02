@@ -1,14 +1,4 @@
-/**
- * Custom Auth Hook
- * Provides convenient access to authentication store and functions
- */
-
 import { useAuthStore } from '../stores/authStore';
-
-/**
- * Custom hook for authentication operations
- * @returns {Object} Auth state and methods
- */
 export const useAuth = () => {
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
