@@ -42,7 +42,10 @@ const Register = () => {
       login(userData, userData?.token);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed.');
+      const validationErrors = err.response?.data?.data;
+      const firstValidationError =
+        validationErrors && Object.values(validationErrors).flat().find(Boolean);
+      setError(firstValidationError || err.response?.data?.message || 'Registration failed.');
     } finally {
       setLoading(false);
     }
